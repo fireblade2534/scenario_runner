@@ -1,5 +1,6 @@
 import carla
 
+from scenerio_runner.srunner.osc2_stdlib.sensors import Sensor
 import srunner.osc2_stdlib.misc_object as misc
 import srunner.scenariomanager.carla_data_provider as carla_provider
 from srunner.tools.osc2_helper import OSC2Helper
@@ -19,6 +20,7 @@ class Vehicle:
         self.color = None
         self.category = "car"  # vehicle or pedestrian, vehicleCategory  car
         self.args = dict()
+        self.sensors = []
 
     def set_arg(self, kw):
         self.args.update(kw)
@@ -72,6 +74,15 @@ class Vehicle:
         ret = carla_provider.CarlaDataProvider.get_transform(actor)
         return ret
 
+    def set_sensors(self, sensors: list[Sensor]):
+        self.sensors = sensors
+
+    def get_sensors(self) -> list[Sensor]:
+        return self.sensors
+
+    def setup_sensors(self, parent: carla.Actor):
+        for sensor in self.sensors:
+            sensor.setup(parent)
 
 class Car(Vehicle):
     def __init__(self) -> None:

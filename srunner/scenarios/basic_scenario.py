@@ -23,7 +23,7 @@ from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.scenariomanager.timer import TimeOut
 from srunner.scenariomanager.scenarioatomics.atomic_behaviors import UpdateAllActorControls
 from srunner.scenariomanager.scenarioatomics.atomic_criteria import Criterion
-
+from srunner.osc2_stdlib.vehicle import Vehicle as OSC2Vehicle
 
 class BasicScenario(object):
 
@@ -171,6 +171,17 @@ class BasicScenario(object):
 
             for new_actor in new_actors:
                 self.other_actors.append(new_actor)
+
+                for new_actor in new_actors:
+                    self.other_actors.append(new_actor)
+
+                    # Only applies to OSC2 scenarios
+                    if hasattr(config, "all_actors"):
+                        name = new_actor.attributes.get("role_name")
+                        vehicle_config = config.all_actors.get(name)
+
+                        if isinstance(vehicle_config, OSC2Vehicle):
+                            vehicle_config.setup_sensors(new_actor)
                 
     def _destroy_other_actors(self):
         """

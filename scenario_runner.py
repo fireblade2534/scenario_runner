@@ -20,6 +20,8 @@ import traceback
 import argparse
 from argparse import RawTextHelpFormatter
 from datetime import datetime
+
+from scenerio_runner.srunner import osc2_stdlib
 try:
     from packaging.version import Version
 except ImportError:
@@ -57,6 +59,7 @@ from srunner.tools.route_parser import RouteParser
 from srunner.tools.osc2_helper import OSC2Helper
 from srunner.scenarios.osc2_scenario import OSC2Scenario
 from srunner.scenarioconfigs.osc2_scenario_configuration import OSC2ScenarioConfiguration
+from srunner.osc2_stdlib.vehicle import Vehicle as OSC2Vehicle
 
 # Minimum version of CARLA that is required
 MIN_CARLA_VERSION = '0.9.14'
@@ -226,8 +229,6 @@ class ScenarioRunner(object):
         Spawn or update the ego vehicles
         """
 
-        print(ego_vehicles)
-
         if not self._args.waitForEgo:
             for vehicle in ego_vehicles:
                 self.ego_vehicles.append(CarlaDataProvider.request_new_actor(vehicle.model,
@@ -265,6 +266,10 @@ class ScenarioRunner(object):
             self.world.tick()
         else:
             self.world.wait_for_tick()
+
+        for vehicle_config, carla_vehicle in zip(ego_vehicles, self.ego_vehicles):
+            if isinstance(vehicle_config, OSC2Vehicle) and carla_vehicle is not None:
+                vehicle_config.setup_sensors(carla_vehicle)
 
     def _analyze_scenario(self, config):
         """
