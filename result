@@ -6,14 +6,12 @@ unit h           of time is SI(s: 1, factor: 3600)
 unit minute      of time is SI(s: 1, factor: 60)
 unit min         of time is SI(s: 1, factor: 60)
 # end::library-physical-time[]
-
 # tag::library-physical-length[]
 type length is SI(m: 1)
 unit m          of length is SI(m: 1, factor: 1)
 unit meter      of length is SI(m: 1, factor: 1)
 unit km         of length is SI(m: 1, factor: 1000)
 # end::library-physical-length[]
-
 # tag::library-physical-velocity[]
 type velocity is SI(m: 1, s: -1)
 unit meter_per_second    of velocity is SI(m: 1, s: -1, factor: 1)
@@ -27,7 +25,6 @@ unit miph                of velocity is SI(m: 1, s: -1, factor: 0.447038889)
 unit mmph                of velocity is SI(m: 1, s: -1, factor: 0.000000278)
 unit millimeter_per_hour of velocity is SI(m: 1, s: -1, factor: 0.000000278)
 # end::library-physical-velocity[]
-
 # tag::library-physical-angle[]
 type angle is SI(rad: 1)
 unit degree of angle is SI(rad: 1, factor: 57.295779513)
@@ -42,6 +39,46 @@ modifier Path.set_map
 modifier Path.path_min_driving_lanes
 actor Model3
 actor Rubicon
+actor Car
+actor Mkz2017
+actor Carlacola
+actor AudiA2
+actor AudiEtron
+actor AudiTT
+actor BmwGrandtourer
+actor ChevroletImpala
+actor CitroenC3
+actor DodgeCharger2020
+actor DodgeChargerPolice
+actor DodgeChargerPolice2020
+actor FordCrown
+actor FordMustang
+actor LincolnMkz2020
+actor MercedesCoupe
+actor MercedesCoupe2020
+actor MicroMicrolino
+actor MiniCooperS
+actor MiniCooperS2021
+actor NissanMicra
+actor NissanPatrol
+actor NissanPatrol2021
+actor SeatLeon
+actor ToyotaPrius
+actor CarlaMotorsEuropeanHGV
+actor CarlaMotorsFiretruck
+actor TeslaCybertruck
+actor FordAmbulance
+actor MercedesSprinter
+actor VolkswagenT2
+actor VolkswagenT22021
+actor MitsubishiFusorosa
+actor HarleyDavidsonLowRider
+actor KawasakiNinja
+actor VespaZX125
+actor YamahaYZF
+actor BhCrossbike
+actor DiamondbackCentury
+actor GazelleOmafiets
 #import basic.osc
 
 type acceleration is SI(m: 1, s: -2)

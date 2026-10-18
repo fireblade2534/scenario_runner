@@ -20,18 +20,63 @@ from srunner.osc2_stdlib.path import Path
 
 # pylint: disable=line-too-long
 from srunner.scenarioconfigs.scenario_configuration import ScenarioConfiguration
+
+# pylint: enable=line-too-long
+from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
+
+# OSC2
+from srunner.tools.osc2_helper import OSC2Helper
+
 # '''
 # Parses the osc2 scenario description file, generates type objects in the standard
 # library based on the type and keep constraint parameters, and sets parameters
 # '''
 
-# pylint: enable=line-too-long
-from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
-# OSC2
-from srunner.tools.osc2_helper import OSC2Helper
 
-vehicle_type = ["Car", "Model3", "Mkz2017", "Carlacola", "Rubicon"]
-
+vehicle_type = [
+    "Car",
+    "Model3",
+    "Mkz2017",
+    "Carlacola",
+    "Rubicon",
+    "AudiA2",
+    "AudiEtron",
+    "AudiTT",
+    "BmwGrandtourer",
+    "ChevroletImpala",
+    "CitroenC3",
+    "DodgeCharger2020",
+    "DodgeChargerPolice",
+    "DodgeChargerPolice2020",
+    "FordCrown",
+    "FordMustang",
+    "LincolnMkz2020",
+    "MercedesCoupe",
+    "MercedesCoupe2020",
+    "MicroMicrolino",
+    "MiniCooperS",
+    "MiniCooperS2021",
+    "NissanMicra",
+    "NissanPatrol",
+    "NissanPatrol2021",
+    "SeatLeon",
+    "ToyotaPrius",
+    "CarlaMotorsEuropeanHGV",
+    "CarlaMotorsFiretruck",
+    "TeslaCybertruck",
+    "FordAmbulance",
+    "MercedesSprinter",
+    "VolkswagenT2",
+    "VolkswagenT22021",
+    "MitsubishiFusorosa",
+    "HarleyDavidsonLowRider",
+    "KawasakiNinja",
+    "VespaZX125",
+    "YamahaYZF",
+    "BhCrossbike",
+    "DiamondbackCentury",
+    "GazelleOmafiets",
+]
 
 def flat_list(list_of_lists):
     if len(list_of_lists) == 0:

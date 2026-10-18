@@ -1,5 +1,3 @@
-import math
-
 import carla
 
 import srunner.osc2_stdlib.misc_object as misc
@@ -89,8 +87,7 @@ class Model3(Car):
 class Mkz2017(Car):
     def __init__(self) -> None:
         super().__init__()
-        self.set_model("vehicle.lincoln.mkz2017")
-
+        self.set_model("vehicle.lincoln.mkz_2017")
 
 class Carlacola(Car):
     def __init__(self) -> None:
@@ -102,3 +99,227 @@ class Rubicon(Car):
     def __init__(self) -> None:
         super().__init__()
         self.set_model("vehicle.jeep.wrangler_rubicon")
+
+
+class AudiA2(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.audi.a2")
+
+
+class AudiEtron(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.audi.etron")
+
+
+class AudiTT(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.audi.tt")
+
+
+class BmwGrandtourer(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.bmw.grandtourer")
+
+
+class ChevroletImpala(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.chevrolet.impala")
+
+
+class CitroenC3(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.citroen.c3")
+
+
+class DodgeCharger2020(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.dodge.charger_2020")
+
+
+class DodgeChargerPolice(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.dodge.charger_police")
+
+
+class DodgeChargerPolice2020(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.dodge.charger_police_2020")
+
+
+class FordCrown(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.ford.crown")
+
+
+class FordMustang(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.ford.mustang")
+
+
+class LincolnMkz2020(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.lincoln.mkz_2020")
+
+
+class MercedesCoupe(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mercedes.coupe")
+
+
+class MercedesCoupe2020(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mercedes.coupe_2020")
+
+
+class MicroMicrolino(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.micro.microlino")
+
+
+class MiniCooperS(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mini.cooper_s")
+
+
+class MiniCooperS2021(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mini.cooper_s_2021")
+
+
+class NissanMicra(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.nissan.micra")
+
+
+class NissanPatrol(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.nissan.patrol")
+
+
+class NissanPatrol2021(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.nissan.patrol_2021")
+
+
+class SeatLeon(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.seat.leon")
+
+
+class ToyotaPrius(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.toyota.prius")
+
+
+class CarlaMotorsEuropeanHGV(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.carlamotors.european_hgv")
+
+
+class CarlaMotorsFiretruck(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.carlamotors.firetruck")
+
+
+class TeslaCybertruck(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.tesla.cybertruck")
+
+
+class FordAmbulance(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.ford.ambulance")
+
+
+class MercedesSprinter(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mercedes.sprinter")
+
+
+class VolkswagenT2(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.volkswagen.t2")
+
+
+class VolkswagenT22021(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.volkswagen.t2_2021")
+
+
+class MitsubishiFusorosa(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.mitsubishi.fusorosa")
+
+
+class HarleyDavidsonLowRider(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.harley-davidson.low_rider")
+
+
+class KawasakiNinja(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.kawasaki.ninja")
+
+
+class VespaZX125(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.vespa.zx125")
+
+
+class YamahaYZF(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.yamaha.yzf")
+
+
+class BhCrossbike(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.bh.crossbike")
+
+
+class DiamondbackCentury(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.diamondback.century")
+
+
+class GazelleOmafiets(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.gazelle.omafiets")
+
+
