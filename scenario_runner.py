@@ -227,6 +227,8 @@ class ScenarioRunner(object):
         Spawn or update the ego vehicles
         """
 
+        print(ego_vehicles)
+
         if not self._args.waitForEgo:
             for vehicle in ego_vehicles:
                 self.ego_vehicles.append(CarlaDataProvider.request_new_actor(vehicle.model,

@@ -62,9 +62,8 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
     _world = None               # type: carla.World
     _map = None                 # type: carla.Map
     _sync_flag = False          # type: bool
+    _used_spawn_points = None   # type: list[bool]
     _spawn_points = None        # type: list[carla.Transform]
-    _spawn_index = 0            # type: int
-    """Index of spawn points that have been used"""
     _blueprint_library = None   # type: carla.BlueprintLibrary
     _all_actors = None          # type: carla.ActorList
     _ego_vehicle_route = None
@@ -526,7 +525,7 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
         spawn_points = list(CarlaDataProvider.get_map(CarlaDataProvider._world).get_spawn_points())
         CarlaDataProvider._rng.shuffle(spawn_points)
         CarlaDataProvider._spawn_points = spawn_points
-        CarlaDataProvider._spawn_index = 0
+        CarlaDataProvider._used_spawn_points = [False] * len(spawn_points)
 
     @staticmethod
     def check_road_length(wp: carla.Waypoint, length: float):
@@ -624,12 +623,12 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
         if CarlaDataProvider._spawn_points is None:
             CarlaDataProvider.generate_spawn_points()
 
-        if CarlaDataProvider._spawn_index >= len(CarlaDataProvider._spawn_points):
-            print("No more spawn points to use")
-            return None
-        else:
-            pos = CarlaDataProvider._spawn_points[CarlaDataProvider._spawn_index]  # pylint: disable=unsubscriptable-object
-            CarlaDataProvider._spawn_index += 1
+
+        for spawn_index in range(0, len(CarlaDataProvider._spawn_points)):
+            if CarlaDataProvider._used_spawn_points[spawn_index] == True:
+                continue
+
+            pos = CarlaDataProvider._spawn_points[spawn_index]  # pylint: disable=unsubscriptable-object
             wp = CarlaDataProvider.get_map().get_waypoint(
                 pos.location, project_to_road=True, lane_type=carla.LaneType.Driving
             )
@@ -637,10 +636,11 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
             road_lanes = CarlaDataProvider.get_road_lanes(wp)
 
             lane = int(float(lane_num))
-            if lane > len(road_lanes):
-                return None
-            else:
+            if 1 - len(road_lanes) <= lane <= len(road_lanes):
+                CarlaDataProvider._used_spawn_points[spawn_index] = True
                 return road_lanes[lane - 1]
+
+        return None
 
     @staticmethod
     def create_blueprint(model, rolename='scenario', color=None, actor_category="car", attribute_filter=None):
@@ -918,12 +918,15 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
             if not transform:
                 continue
             if actor.random_location:
-                if CarlaDataProvider._spawn_index >= len(CarlaDataProvider._spawn_points):
-                    print("No more spawn points to use")
+                for spawn_index in range(0, len(CarlaDataProvider._spawn_points)):
+                    if CarlaDataProvider._used_spawn_points[spawn_index] == True:
+                        continue
+                    _spawn_point = CarlaDataProvider._spawn_points[spawn_index]
+                    CarlaDataProvider._used_spawn_points[spawn_index] = True
                     break
                 else:
-                    _spawn_point = CarlaDataProvider._spawn_points[CarlaDataProvider._spawn_index]  # pylint: disable=unsubscriptable-object
-                    CarlaDataProvider._spawn_index += 1
+                    print("No more spawn points to use")
+                    break
 
             else:
                 _spawn_point = carla.Transform()
@@ -1000,12 +1003,16 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
             blueprint = CarlaDataProvider.create_blueprint(model, rolename, attribute_filter=attribute_filter)
 
             if random_location:
-                if CarlaDataProvider._spawn_index >= len(CarlaDataProvider._spawn_points):
-                    print("No more spawn points to use. Spawned {} actors out of {}".format(i + 1, amount))
+                for spawn_index in range(0, len(CarlaDataProvider._spawn_points)):
+                    if CarlaDataProvider._used_spawn_points[spawn_index] == False:
+                        continue
+                    spawn_point = CarlaDataProvider._spawn_points[spawn_index]
+                    CarlaDataProvider._used_spawn_points[spawn_index] = True
                     break
                 else:
-                    spawn_point = CarlaDataProvider._spawn_points[CarlaDataProvider._spawn_index]  # pylint: disable=unsubscriptable-object
-                    CarlaDataProvider._spawn_index += 1
+                    print("No more spawn points to use. Spawned {} actors out of {}".format(i + 1, amount))
+                    break
+
             else:
                 try:
                     spawn_point = spawn_points[i]

@@ -1,0 +1,27 @@
+[project]
+name = "scenerio-runner"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "antlr4-python3-runtime==4.10",
+    "carla==0.9.16",
+    "ephem>=4.2.1",
+    "graphviz>=0.21",
+    "matplotlib>=3.10.9",
+    "networkx==3.4.2",
+    "numpy==1.24.4 ; python_full_version >= '3'",
+    "opencv-python==4.7.0.72",
+    "psutil>=7.2.2",
+    "py-trees==0.8.3",
+    "shapely==2.1.1",
+    "simple-watchdog-timer>=0.1.1",
+    "six>=1.17.0",
+    "tabulate>=0.10.0",
+    "xmlschema==1.0.18",
+]
+
+
+[tool.uv]
+package = false
