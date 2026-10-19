@@ -1004,7 +1004,7 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
 
             if random_location:
                 for spawn_index in range(0, len(CarlaDataProvider._spawn_points)):
-                    if CarlaDataProvider._used_spawn_points[spawn_index] == False:
+                    if CarlaDataProvider._used_spawn_points[spawn_index] == True:
                         continue
                     spawn_point = CarlaDataProvider._spawn_points[spawn_index]
                     CarlaDataProvider._used_spawn_points[spawn_index] = True

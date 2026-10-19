@@ -172,16 +172,13 @@ class BasicScenario(object):
             for new_actor in new_actors:
                 self.other_actors.append(new_actor)
 
-                for new_actor in new_actors:
-                    self.other_actors.append(new_actor)
+                # Only applies to OSC2 scenarios
+                if hasattr(config, "all_actors"):
+                    name = new_actor.attributes.get("role_name")
+                    vehicle_config = config.all_actors.get(name)
 
-                    # Only applies to OSC2 scenarios
-                    if hasattr(config, "all_actors"):
-                        name = new_actor.attributes.get("role_name")
-                        vehicle_config = config.all_actors.get(name)
-
-                        if isinstance(vehicle_config, OSC2Vehicle):
-                            vehicle_config.setup_sensors(new_actor)
+                    if isinstance(vehicle_config, OSC2Vehicle):
+                        vehicle_config.setup_sensors(new_actor)
                 
     def _destroy_other_actors(self):
         """
