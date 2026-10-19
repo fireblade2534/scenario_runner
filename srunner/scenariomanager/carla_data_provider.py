@@ -20,6 +20,7 @@ from six import iteritems
 
 import carla
 from agents.navigation.global_route_planner import GlobalRoutePlanner
+from srunner.tools.ring_buffer import RingBuffer
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -55,6 +56,7 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
     _actor_velocity_map = {}    # type: dict[carla.Actor, float]
     _actor_location_map = {}    # type: dict[carla.Actor, carla.Location]
     _actor_transform_map = {}   # type: dict[carla.Actor, carla.Transform]
+    _actor_bounding_map = {}   # type: dict[carla.Actor, carla.BoundingBox]
     _traffic_light_map = {}     # type: dict[carla.TrafficLight, carla.Transform]
     _carla_actor_pool = {}      # type: dict[int, carla.Actor]
     _global_osc_parameters = {}  # type: dict[str, Any] # type: ignore : suppresses the missing Any import
@@ -75,6 +77,8 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
     _runtime_init_flag = False
     _lock = threading.Lock()
     _latest_scenario = ""
+    _snapshot_ring_buffer = RingBuffer(5)
+    _sensor_sync = None
 
     @staticmethod
     def set_local_planner(plan):
@@ -108,6 +112,11 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
                 raise KeyError("Vehicle '{}' already registered. Cannot register twice!".format(actor.id))
             else:
                 CarlaDataProvider._actor_transform_map[actor] = transform
+
+            if actor in CarlaDataProvider._actor_bounding_map:
+                raise KeyError("Vehicle '{}' already registered. Cannot register twice!".format(actor.id))
+            else:
+                CarlaDataProvider._actor_bounding_map[actor] = actor.bounding_box
 
     @staticmethod
     def update_osc_global_params(parameters):
@@ -158,9 +167,16 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
                 else:
                     del CarlaDataProvider._actor_transform_map[actor]
 
+            for actor in CarlaDataProvider._actor_bounding_map.copy():
+                if not (actor is not None and actor.is_alive):
+                    del CarlaDataProvider._actor_bounding_map[actor]
+
             world = CarlaDataProvider._world
             if world is None:
                 print("WARNING: CarlaDataProvider couldn't find the world")
+
+            snapshot = world.get_snapshot()
+            CarlaDataProvider._snapshot_ring_buffer.set_frame(snapshot.frame, [snapshot, {actor.id: bounding for actor, bounding in CarlaDataProvider._actor_bounding_map.items()}])
 
             CarlaDataProvider._all_actors = None
 
@@ -239,11 +255,14 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
         """
         Set the world and world settings
         """
+        from srunner.osc2_stdlib.sensors import SensorSynchronizer
+
         CarlaDataProvider._world = world
         CarlaDataProvider._sync_flag = world.get_settings().synchronous_mode
         CarlaDataProvider._map = world.get_map()
         CarlaDataProvider._blueprint_library = world.get_blueprint_library()
         CarlaDataProvider._grp = GlobalRoutePlanner(CarlaDataProvider._map, 2.0)
+        CarlaDataProvider._sensor_sync = SensorSynchronizer(world)
         CarlaDataProvider.generate_spawn_points()
         CarlaDataProvider.prepare_map()
 
@@ -1035,6 +1054,20 @@ class CarlaDataProvider(object):  # pylint: disable=too-many-public-methods
             CarlaDataProvider.register_actor(actor, command.transform)
 
         return actors
+
+    @staticmethod
+    def get_snapshot_ring_buffer() -> RingBuffer:
+        """
+        Gets the snapshot ring buffer
+        """
+        return CarlaDataProvider._snapshot_ring_buffer
+
+    @staticmethod
+    def get_sensor_sync():
+        """
+        Gets the sensor sync
+        """
+        return CarlaDataProvider._sensor_sync
 
     @staticmethod
     def get_actors():

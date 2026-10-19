@@ -1,24 +1,33 @@
+from threading import Lock
+
 import carla
 import roslibpy
+from srunner.tools.ring_buffer import RingBuffer
 from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.tools.util import bbox_orientation_to_sensor, object_to_sensor
 
 ROS_PUBLISHER = roslibpy.Ros(host="localhost", port=9080)
 
+
 class Sensor:
     def __init__(self, self_name: str, type: str, transform: carla.Transform, attributes: dict[str, str]) -> None:
-        self.self_name = self_name          # Sensor name
-        self.type = type                    # Sensor type
-        self.transform = transform          # Relative transform of the sensor
-        self.attributes = attributes        # Sensor attributes
+        self.self_name = self_name              # Sensor name
+        self.type = type                        # Sensor type
+        self.transform = transform              # Relative transform of the sensor
+        self.attributes = attributes            # Sensor attributes
 
-        self.sensor_bp = []                 # Sensor blueprints
-        self.sensors = []                   # Sensors
+        self.sensor_bp = []                     # Sensor blueprints
+        self.sensors = []                       # Sensors
 
-        self.parent_name = ""               # Sensor parent name
+        self.parent_name = ""                   # Sensor parent name
+        self.parent_id = 0                      # Sensor parent id
+
+        self.ring_buffer: list[RingBuffer] = [] # Optional ring buffer for custom sensors
+        self.process_custom_sensor = []         # Optional processing function for custom sensors
 
     def setup(self, parent: carla.Actor):
         self.parent_name = parent.attributes.get("role_name")
+        self.parent_id = parent.id
 
         self.sensor_bp.append(CarlaDataProvider.get_blueprint_library().find(self.type))
 
@@ -136,25 +145,21 @@ class Radar(Sensor):
 
 
 class SemanticRadar(Sensor):
-    def __init__(self, self_name: str, transform: carla.Transform, attributes: dict[str, str]) -> None:
+    def __init__(self, self_name: str, transform: carla.Transform, attributes: dict[str, str], ring_buffer_size: int = 3) -> None:
         super().__init__(self_name, "sensor.other.radar_semantic", transform, attributes)
         self.required_hits = 5
 
-    def _on_lidar(self, data: carla.SemanticLidarMeasurement):
-        lidar_frame = data.frame
-        current_frame = CarlaDataProvider.get_world().get_snapshot().frame
+        self.ring_buffer = [RingBuffer(ring_buffer_size)]
+        self.process_custom_sensor = [self._process_lidar]
 
-        if lidar_frame != current_frame:
-            print(
-                f"Frame mismatch! "
-                f"Semantic Radar: {lidar_frame}, "
-                f"World: {current_frame}"
-            )
-            
+    def _on_lidar(self, data: carla.SemanticLidarMeasurement):
+        self.ring_buffer[0].set_frame(data.frame, data)
+
+    def _process_lidar(self, data: carla.SemanticLidarMeasurement, world_snapshot: carla.WorldSnapshot, world_bounding: dict[int, carla.BoundingBox]):
         tracks_hits = {}
         tracks = []
 
-        parent = CarlaDataProvider.get_actor_by_id(self.parent_id)
+        parent = world_snapshot.find(self.parent_id)
 
         if parent is None:
             print(f"Semantic radar parent {self.parent_id} not found")
@@ -171,18 +176,22 @@ class SemanticRadar(Sensor):
             if object_data[0] < self.required_hits:
                 continue
 
-            actor = CarlaDataProvider.get_actor_by_id(object_id)
+            actor = world_snapshot.find(object_id)
             if actor is None or actor.id == self.parent_id:
                 continue
 
-            sensor_relative = object_to_sensor(actor, parent, data.transform)
+            actor_bounding = world_bounding.get(actor.id)
+            if actor_bounding is None:
+                continue
+
+            sensor_relative = object_to_sensor(actor, actor_bounding, parent, data.transform)
 
             pos = sensor_relative["position"]
             vel = sensor_relative["velocity"]
             size = sensor_relative["size"]
 
             orientation = bbox_orientation_to_sensor(
-                actor, data.transform
+                actor_bounding, actor.get_transform(), data.transform
             )
 
             tracks.append({
@@ -228,8 +237,6 @@ class SemanticRadar(Sensor):
         })
 
         self.publisher.publish(message)
-
-
 
     def setup(self, parent: carla.Actor):
         global ROS_PUBLISHER
@@ -283,3 +290,56 @@ class SemanticRadar(Sensor):
             attach_to=parent
         ))
         self.sensors[0].listen(lambda data: self._on_lidar(data))
+
+        CarlaDataProvider.get_sensor_sync().register(self)
+
+
+
+
+class SensorSynchronizer:
+    def __init__(self, world: carla.World):
+        self.world = world
+        self.lock = Lock()
+        self.sensors: dict[str, Sensor] = {}
+        self.tick_id = world.on_tick(self.on_tick)
+
+    def get_sensor_id(self, sensor: Sensor) -> str:
+        return f"{sensor.parent_id}/{sensor.self_name}"
+
+    def register(self, sensor: Sensor):
+        with self.lock:
+            self.sensors[self.get_sensor_id(sensor)] = sensor
+
+    def on_tick(self, current_snapshot: carla.WorldSnapshot):
+        destroyed_sensors = []
+        jobs = []
+        
+        with self.lock:
+            for sensor_container in self.sensors.values():
+                any_sensor_active = False
+
+                for index, sensor in enumerate(sensor_container.sensors):
+                    if not current_snapshot.has_actor(sensor.id):
+                        continue
+                    any_sensor_active = True
+
+                    sensor_ring_buffer = sensor_container.ring_buffer[index]
+                    for uncompleted_frame in sensor_ring_buffer.get_all_indexes():
+                        from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
+                        snapshot = CarlaDataProvider.get_snapshot_ring_buffer().get_frame(uncompleted_frame)
+                        if snapshot is None:
+                            continue
+
+                        frame_data = sensor_ring_buffer.get_frame(uncompleted_frame)
+                        sensor_ring_buffer.set_frame_completed(frame_data.frame)
+
+                        jobs.append([sensor_container.process_custom_sensor[index], (frame_data, snapshot[0], snapshot[1])])
+                        
+                if not any_sensor_active:
+                    destroyed_sensors.append(self.get_sensor_id(sensor_container))
+
+        for job in jobs:
+            job[0](*job[1])
+
+        for sensor_id in destroyed_sensors:
+            self.sensors.pop(sensor_id)
