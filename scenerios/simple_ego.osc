@@ -14,10 +14,10 @@ scenario top:
     do parallel:
         ego_vehicle.drive(path) with:
             lane(1, at: start)
-            speed(0kph)
+            speed(5kph)
 
         npc.drive(path) with:
-            position(20m, ahead_of: ego_vehicle, at: start)
-            speed(0kph)
+            position(10m, ahead_of: ego_vehicle, at: start)
+            speed(6kph)
 
         wait elapsed(80s)

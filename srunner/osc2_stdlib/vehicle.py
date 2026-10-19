@@ -339,7 +339,7 @@ class Ego(Car):
         super().__init__()
         self.set_model("vehicle.tesla.model3")
         self.set_sensors([
-            SemanticRadar("front_radar", carla.Transform(carla.Location(x=1.5, z=2.2)), {"vertical_fov": 30, "horizontal_fov": 30, "range": 20})
+            SemanticRadar("front_radar", carla.Transform(carla.Location(x=1.5, z=2.2)), {"vertical_fov": 30, "horizontal_fov": 30, "range": 60})
         ])
 
 

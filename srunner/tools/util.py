@@ -28,20 +28,28 @@ def to_radians(vector: carla.Vector3D):
     )
 
 def object_to_sensor(actor: carla.ActorSnapshot, actor_bounding: carla.BoundingBox, ego: carla.ActorSnapshot, sensor_transform: carla.Transform):
-    center_world = actor.get_transform().transform(actor_bounding.location)
+    actor_transform = actor.get_transform()
 
-    pos = sensor_transform.inverse_transform(center_world)
+    center_world = carla.Location(
+        x=actor_bounding.location.x,
+        y=actor_bounding.location.y,
+        z=actor_bounding.location.z,
+    )
+    actor_transform.transform(center_world)
+
+    pos = carla.Location(
+        x=center_world.x,
+        y=center_world.y,
+        z=center_world.z,
+    )
+    sensor_transform.inverse_transform(pos)
 
     ego_omega = to_radians(ego.get_angular_velocity())
-
     sensor_offset = sensor_transform.location - ego.get_transform().location
-
     sensor_vel = ego.get_velocity() + ego_omega.cross(sensor_offset)
 
     actor_omega = to_radians(actor.get_angular_velocity())
-
-    center_offset = center_world - actor.get_transform().location
-
+    center_offset = center_world - actor_transform.location
     object_vel = actor.get_velocity() + actor_omega.cross(center_offset)
 
     relative_vel = object_vel - sensor_vel
@@ -53,7 +61,7 @@ def object_to_sensor(actor: carla.ActorSnapshot, actor_bounding: carla.BoundingB
     return {
         "position": pos,
         "velocity": carla.Vector3D(vx, vy, vz),
-        "size": actor_bounding.extent * 2
+        "size": actor_bounding.extent * 2,
     }
 
 # Written by Chat GPT 6
