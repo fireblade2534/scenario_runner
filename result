@@ -79,21 +79,27 @@ actor YamahaYZF
 actor BhCrossbike
 actor DiamondbackCentury
 actor GazelleOmafiets
+actor Ego
+
 #import basic.osc
 
-type acceleration is SI(m: 1, s: -2)
-unit kphps               of acceleration is SI(m: 1, s: -1, factor: 0.277777778)
-
 scenario top:
-    path: Path                      # A path in the map
-    path.set_map("Town04")    # specify map to use in this test
-    path.path_min_driving_lanes(2)         # Path should have at least two lanes
+    path: Path
+    path.set_map("Town04")
+    path.path_min_driving_lanes(2)
 
-    ego_vehicle: Model3                # ego car
+    ego_vehicle: Ego
+    npc: Model3
 
     event start
-    event end
-    do serial:
-        get_ahead: parallel(duration: 15s):
-            ego_vehicle.drive(path) with:
-                lane(1, at: start)
+
+    do parallel:
+        ego_vehicle.drive(path) with:
+            lane(1, at: start)
+            speed(0kph)
+
+        npc.drive(path) with:
+            position(20m, ahead_of: ego_vehicle, at: start)
+            speed(0kph)
+
+        wait elapsed(80s)

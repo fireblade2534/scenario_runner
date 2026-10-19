@@ -21,7 +21,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 from datetime import datetime
 
-from scenerio_runner.srunner import osc2_stdlib
 try:
     from packaging.version import Version
 except ImportError:

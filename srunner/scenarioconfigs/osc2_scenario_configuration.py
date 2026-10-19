@@ -76,6 +76,7 @@ vehicle_type = [
     "BhCrossbike",
     "DiamondbackCentury",
     "GazelleOmafiets",
+    "Ego"
 ]
 
 def flat_list(list_of_lists):

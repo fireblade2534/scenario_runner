@@ -1,6 +1,6 @@
 import carla
 
-from scenerio_runner.srunner.osc2_stdlib.sensors import Sensor
+from srunner.osc2_stdlib.sensors import SemanticRadar, Sensor
 import srunner.osc2_stdlib.misc_object as misc
 import srunner.scenariomanager.carla_data_provider as carla_provider
 from srunner.tools.osc2_helper import OSC2Helper
@@ -332,5 +332,14 @@ class GazelleOmafiets(Car):
     def __init__(self) -> None:
         super().__init__()
         self.set_model("vehicle.gazelle.omafiets")
+
+
+class Ego(Car):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_model("vehicle.tesla.model3")
+        self.set_sensors([
+            SemanticRadar("front_radar", carla.Transform(carla.Location(x=1.5, z=2.2)), {"vertical_fov": 30, "horizontal_fov": 30, "range": 20})
+        ])
 
 
